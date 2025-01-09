@@ -250,7 +250,7 @@ def connect_database():
                 con=pymysql.connect(host=hostEntry.get(),user=usernameEntry.get(),password=passwordEntry.get())
                 mycursor=con.cursor()
                 messagebox.showinfo('success', 'Connection is successfull',parent=connectwindow)
-                query='use stu'
+                query=f'use {dbEntry.get()}'
                 mycursor.execute(query)
                 connectwindow.destroy()
                 
@@ -271,7 +271,7 @@ def connect_database():
     
     connectwindow=Toplevel()
     connectwindow.grab_set()
-    connectwindow.geometry('470x250+730+230')
+    connectwindow.geometry('470x400+730+230')
     connectwindow.title('Connect to Database')
     connectwindow.resizable(0,0)
     
@@ -281,20 +281,26 @@ def connect_database():
     hostEntry=Entry(connectwindow, font=('roman',14, 'normal'),bd=2)
     hostEntry.grid(row=0, column=1,padx=35,pady=20)
     
+    dbnameLabel=Label(connectwindow, text='Database Name',font=('arial',17, 'normal'))
+    dbnameLabel.grid(row=1, column=0)
+    
+    dbEntry=Entry(connectwindow, font=('roman',14, 'normal'),bd=2)
+    dbEntry.grid(row=1, column=1,padx=35,pady=20)
+    
     usernameLabel=Label(connectwindow, text='Username',font=('arial',17, 'normal'))
-    usernameLabel.grid(row=1, column=0)
+    usernameLabel.grid(row=2, column=0)
     
     usernameEntry=Entry(connectwindow, font=('roman',14, 'normal'),bd=2)
-    usernameEntry.grid(row=1, column=1,padx=35,pady=20)
+    usernameEntry.grid(row=2, column=1,padx=35,pady=20)
     
     passwordLabel=Label(connectwindow, text='Password',font=('arial',17, 'normal'))
-    passwordLabel.grid(row=2, column=0)
+    passwordLabel.grid(row=3, column=0)
     
     passwordEntry=Entry(connectwindow, font=('roman',14, 'normal'),bd=2)
-    passwordEntry.grid(row=2, column=1,padx=35,pady=20)
+    passwordEntry.grid(row=3, column=1,padx=35,pady=20)
     
     connectBtn=ttk.Button(connectwindow, text='Connect',command=connectdb)
-    connectBtn.grid(row=3, columnspan=2)
+    connectBtn.grid(row=4, columnspan=2)
     
     
     
