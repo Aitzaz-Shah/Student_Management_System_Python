@@ -111,14 +111,30 @@ def toplevel_btn_window(title,button_text,command):
 
     
 def update_data():
-    
-    query='update students set name=%s,email=%s,gender=%s,dob=%s,mobile=%s,address=%s where id=%s'
-    mycursor.execute(query,(nameEntry.get(),emailEntry.get(),genderEntry.get(),dobEntry.get(),mobileEntry.get(),
-                            addressEntry.get(),idEntry.get()))
-    con.commit()
-    messagebox.showinfo('Success',f'Id {idEntry.get()} is modified successfuly',parent=toplevelScreenBtns)
-    toplevelScreenBtns.destroy()
-    show_Stu()#to update treeview 
+    try:
+        # Validate and reformat DOB
+        from datetime import datetime
+        try:
+            dob = datetime.strptime(dobEntry.get(), '%d%m%Y').strftime('%Y-%m-%d')
+        except ValueError:
+            messagebox.showerror('Error', 'DOB must be in DDMMYYYY format!', parent=toplevelScreenBtns)
+            return
+
+        # Prepare and execute the SQL query
+        query = 'UPDATE students SET name=%s, email=%s, gender=%s, dob=%s, mobile=%s, address=%s WHERE id=%s'
+        mycursor.execute(query, (
+            nameEntry.get(), emailEntry.get(), genderEntry.get(), dob, mobileEntry.get(),
+            addressEntry.get(), idEntry.get()))
+        con.commit()
+
+        # Success message and UI update
+        messagebox.showinfo('Success', f'Id {idEntry.get()} is modified successfully', parent=toplevelScreenBtns)
+        toplevelScreenBtns.destroy()
+        show_Stu()  # Refresh the TreeView
+    except Exception as e:
+        # Show the exact error message
+        messagebox.showerror('Error', f'Error occurred: {e}', parent=toplevelScreenBtns)
+
     
 
 def show_Stu():
@@ -158,30 +174,47 @@ def searchStu():
         
     
 def add_stu_data():
-    if idEntry.get()=='' or nameEntry.get()=='' or emailEntry.get()=='' or genderEntry.get()=='' or dobEntry.get()=='' or mobileEntry.get()=='' or addressEntry.get()== '':
-        messagebox.showerror('Error','Field Empty!',parent=toplevelScreenBtns)
+    if idEntry.get() == '' or nameEntry.get() == '' or emailEntry.get() == '' or genderEntry.get() == '' or dobEntry.get() == '' or mobileEntry.get() == '' or addressEntry.get() == '':
+        messagebox.showerror('Error', 'Field Empty!', parent=toplevelScreenBtns)
     else:
-        currentdate=time.strftime('%d/%m/%Y')
-        currenttime=time.strftime('%H:%M:%S')
+        currentdate = time.strftime('%Y-%m-%d')  # Correct format for MySQL DATE type
+        currenttime = time.strftime('%H:%M:%S')  # Correct format for MySQL TIME type
         try:
-            
-            query='insert into students values(%s,%s,%s,%s,%s,%s,%s,%s,%s)'
-            mycursor.execute(query,(idEntry.get(),nameEntry.get(),emailEntry.get(),genderEntry.get(),dobEntry.get(),mobileEntry.get(),addressEntry.get(),currenttime,currentdate))
+            # Validate and format DOB
+            from datetime import datetime
+
+            try:
+                dob = datetime.strptime(dobEntry.get(), '%d%m%Y').strftime('%Y-%m-%d')
+            except ValueError:
+                messagebox.showerror('Error', 'DOB must be in DDMMYYYY format!', parent=toplevelScreenBtns)
+                return
+
+            # Prepare SQL query
+            query = 'INSERT INTO students (id, name, email, gender, dob, mobile, address, added_time, added_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)'
+            mycursor.execute(query, (
+                idEntry.get(), nameEntry.get(), emailEntry.get(), genderEntry.get(), dob, mobileEntry.get(),
+                addressEntry.get(), currenttime, currentdate))
             con.commit()
-            dec=messagebox.askyesno('Confirm','Data added successfully. Do you want to clean the form?',parent=toplevelScreenBtns)
+
+            # Success message and form reset
+            dec = messagebox.askyesno('Confirm', 'Data added successfully. Do you want to clean the form?',
+                                      parent=toplevelScreenBtns)
             if dec:
-                idEntry.delete(0,END)
-                nameEntry.delete(0,END)
-                emailEntry.delete(0,END)
-                genderEntry.delete(0,END)
-                dobEntry.delete(0,END)
-                mobileEntry.delete(0,END)
-                addressEntry.delete(0,END)
+                idEntry.delete(0, END)
+                nameEntry.delete(0, END)
+                emailEntry.delete(0, END)
+                genderEntry.delete(0, END)
+                dobEntry.delete(0, END)
+                mobileEntry.delete(0, END)
+                addressEntry.delete(0, END)
             else:
                 pass
-        except:
-            messagebox.showerror('Error','Id already exists. Id must be unique!',parent=toplevelScreenBtns)
+        except Exception as e:
+            # Show the exact error message
+            messagebox.showerror('Error', f'Error occurred: {e}', parent=toplevelScreenBtns)
             return
+
+
             
         
         query='select * from students'
@@ -217,7 +250,7 @@ def connect_database():
                 con=pymysql.connect(host=hostEntry.get(),user=usernameEntry.get(),password=passwordEntry.get())
                 mycursor=con.cursor()
                 messagebox.showinfo('success', 'Connection is successfull',parent=connectwindow)
-                query='use tsms'
+                query='use stu'
                 mycursor.execute(query)
                 connectwindow.destroy()
                 
